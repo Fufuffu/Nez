@@ -61,7 +61,7 @@ namespace Nez.Console
 		float _repeatCounter = 0;
 		Keys? _repeatKey = null;
 		bool _canOpen;
-		public static Keys ConsoleKey = Keys.OemTilde;
+		public static Keys ConsoleKey = Keys.F8;
 #if DEBUG
 		internal RuntimeInspector _runtimeInspector;
 #endif
