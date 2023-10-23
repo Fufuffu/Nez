@@ -9,21 +9,31 @@ namespace Nez.PhysicsShapes
 		/// having a separate position field lets us alter the position of the shape for collisions checks as opposed to having to change the
 		/// Entity.position which triggers collider/bounds/hash updates.
 		/// </summary>
-		internal Vector2 position;
+		public Vector2 position;
 
 		/// <summary>
 		/// center is kind of a misnomer. This value isnt necessarily the center of an object. It is more accurately the Collider.localOffset
 		/// with any Transform rotations applied
 		/// </summary>
-		internal Vector2 center;
+		public Vector2 center;
 
 		/// <summary>
 		/// cached bounds for the Shape
 		/// </summary>
-		internal RectangleF bounds;
+		public RectangleF bounds;
 
+		public void RecalculateBounds(Collider collider)
+		{
+			RecalculateBounds(collider.LocalOffset,
+							  collider._localOffsetLength,
+							  collider.Entity.Transform.Position,
+							  collider.Entity.Transform.Scale,
+							  collider.Entity.Transform.Rotation,
+							  collider.ShouldColliderScaleAndRotateWithTransform,
+							  collider._isRotationDirty);
+		}
 
-		internal abstract void RecalculateBounds(Collider collider);
+		public abstract void RecalculateBounds(Vector2 localOffset, float localOffsetLength, Vector2 entityPosition, Vector2 entityScale, float entityRotation, bool shouldRotateAndScale, bool isRotationDirty);
 
 		public abstract bool Overlaps(Shape other);
 

@@ -241,44 +241,43 @@ namespace Nez.PhysicsShapes
 
 
 		#region Shape abstract methods
-
-		internal override void RecalculateBounds(Collider collider)
+		public override void RecalculateBounds(Vector2 localOffset, float localOffsetLength, Vector2 entityPosition, Vector2 entityScale, float entityRotation, bool shouldRotateAndScale, bool isRotationDirty)
 		{
 			// if we dont have rotation or dont care about TRS we use localOffset as the center so we'll start with that
-			center = collider.LocalOffset;
+			center = localOffset;
 
-			if (collider.ShouldColliderScaleAndRotateWithTransform)
+			if (shouldRotateAndScale)
 			{
 				var hasUnitScale = true;
 				Matrix2D tempMat;
 				var combinedMatrix = Matrix2D.CreateTranslation(-_polygonCenter);
 
-				if (collider.Entity.Transform.Scale != Vector2.One)
+				if (entityScale != Vector2.One)
 				{
-					Matrix2D.CreateScale(collider.Entity.Transform.Scale.X, collider.Entity.Transform.Scale.Y,
+					Matrix2D.CreateScale(entityScale.X, entityScale.Y,
 						out tempMat);
 					Matrix2D.Multiply(ref combinedMatrix, ref tempMat, out combinedMatrix);
 
 					hasUnitScale = false;
 
 					// scale our offset and set it as center. If we have rotation also it will be reset below
-					var scaledOffset = collider.LocalOffset * collider.Entity.Transform.Scale;
+					var scaledOffset = localOffset * entityScale;
 					center = scaledOffset;
 				}
 
-				if (collider.Entity.Transform.Rotation != 0)
+				if (entityRotation != 0)
 				{
-					Matrix2D.CreateRotation(collider.Entity.Transform.Rotation, out tempMat);
+					Matrix2D.CreateRotation(entityRotation, out tempMat);
 					Matrix2D.Multiply(ref combinedMatrix, ref tempMat, out combinedMatrix);
 
 					// to deal with rotation with an offset origin we just move our center in a circle around 0,0 with our offset making the 0 angle
 					// we have to deal with scale here as well so we scale our offset to get the proper length first.
-					var offsetAngle = Mathf.Atan2(collider.LocalOffset.Y * collider.Entity.Transform.Scale.Y, collider.LocalOffset.X * collider.Entity.Transform.Scale.X) * Mathf.Rad2Deg;
+					var offsetAngle = Mathf.Atan2(localOffset.Y * entityScale.Y, localOffset.X * entityScale.X) * Mathf.Rad2Deg;
 					var offsetLength = hasUnitScale
-						? collider._localOffsetLength
-						: (collider.LocalOffset * collider.Entity.Transform.Scale).Length();
+						? localOffsetLength
+						: (localOffset * entityScale).Length();
 					center = Mathf.PointOnCircle(Vector2.Zero, offsetLength,
-						collider.Entity.Transform.RotationDegrees + offsetAngle);
+						MathHelper.ToDegrees(entityRotation) + offsetAngle);
 				}
 
 				Matrix2D.CreateTranslation(ref _polygonCenter, out tempMat); // translate back center
@@ -287,14 +286,14 @@ namespace Nez.PhysicsShapes
 				// finaly transform our original points
 				Vector2Ext.Transform(_originalPoints, ref combinedMatrix, Points);
 
-				IsUnrotated = collider.Entity.Transform.Rotation == 0;
+				IsUnrotated = entityRotation == 0;
 
 				// we only need to rebuild our edge normals if we rotated
-				if (collider._isRotationDirty)
+				if (isRotationDirty)
 					_areEdgeNormalsDirty = true;
 			}
 
-			position = collider.Entity.Transform.Position + center;
+			position = entityPosition + center;
 			bounds = RectangleF.RectEncompassingPoints(Points);
 			bounds.Location += position;
 		}

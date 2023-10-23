@@ -33,32 +33,32 @@ namespace Nez.PhysicsShapes
 		}
 
 
-		internal override void RecalculateBounds(Collider collider)
+		public override void RecalculateBounds(Vector2 localOffset, float localOffsetLength, Vector2 entityPosition, Vector2 entityScale, float entityRotation, bool shouldRotateAndScale, bool isRotationDirty)
 		{
 			// if we dont have rotation or dont care about TRS we use localOffset as the center so we'll start with that
-			center = collider.LocalOffset;
+			center = localOffset;
 
-			if (collider.ShouldColliderScaleAndRotateWithTransform)
+			if (shouldRotateAndScale)
 			{
 				// we only scale lineraly being a circle so we'll use the max value
-				var scale = collider.Entity.Transform.Scale;
+				var scale = entityScale;
 				var hasUnitScale = scale.X == 1 && scale.Y == 1;
 				var maxScale = Math.Max(scale.X, scale.Y);
 				Radius = _originalRadius * maxScale;
 
-				if (collider.Entity.Transform.Rotation != 0)
+				if (entityRotation != 0)
 				{
 					// to deal with rotation with an offset origin we just move our center in a circle around 0,0 with our offset making the 0 angle
-					var offsetAngle = Mathf.Atan2(collider.LocalOffset.Y, collider.LocalOffset.X) * Mathf.Rad2Deg;
+					var offsetAngle = Mathf.Atan2(localOffset.Y, localOffset.X) * Mathf.Rad2Deg;
 					var offsetLength = hasUnitScale
-						? collider._localOffsetLength
-						: (collider.LocalOffset * collider.Entity.Transform.Scale).Length();
+						? localOffsetLength
+						: (localOffset * entityScale).Length();
 					center = Mathf.PointOnCircle(Vector2.Zero, offsetLength,
-						collider.Entity.Transform.RotationDegrees + offsetAngle);
+						MathHelper.ToDegrees(entityRotation) + offsetAngle);
 				}
 			}
 
-			position = collider.Entity.Transform.Position + center;
+			position = entityPosition + center;
 			bounds = new RectangleF(position.X - Radius, position.Y - Radius, Radius * 2f, Radius * 2f);
 		}
 
