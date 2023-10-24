@@ -223,7 +223,7 @@ namespace Nez.Particles
 
 					_circleCollisionShape.RecalculateBounds(particleSize * 0.5f * collisionConfig.RadiusScale,
 						pos + position);
-					var neighbors = Physics.BoxcastBroadphase(ref _circleCollisionShape.bounds,
+					var neighbors = Core.Physics.BoxcastBroadphase(ref _circleCollisionShape.bounds,
 						collisionConfig.CollidesWithLayers);
 					foreach (var neighbor in neighbors)
 					{

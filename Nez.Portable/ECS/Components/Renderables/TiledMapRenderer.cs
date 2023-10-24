@@ -178,7 +178,7 @@ namespace Nez
 				collider.Entity = Entity;
 				_colliders[i] = collider;
 
-				Physics.AddCollider(collider);
+				Core.Physics.AddCollider(collider);
 			}
 		}
 
@@ -188,7 +188,7 @@ namespace Nez
 				return;
 
 			foreach (var collider in _colliders)
-				Physics.RemoveCollider(collider);
+				Core.Physics.RemoveCollider(collider);
 			_colliders = null;
 		}
 

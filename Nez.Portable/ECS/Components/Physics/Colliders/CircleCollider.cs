@@ -56,11 +56,11 @@ namespace Nez
 			if (radius != circle.Radius)
 			{
 				circle.Radius = radius;
-				circle._originalRadius = radius;
+				circle.originalRadius = radius;
 				_isPositionDirty = true;
 
 				if (Entity != null && _isParentEntityAddedToScene && Enabled)
-					Physics.UpdateCollider(this);
+					Core.Physics.UpdateCollider(this);
 			}
 
 			return this;

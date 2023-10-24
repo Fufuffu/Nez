@@ -79,6 +79,8 @@ namespace Nez
 		/// </summary>
 		public static Core Instance => _instance;
 
+		public static Physics Physics => _physics;
+
 		/// <summary>
 		/// facilitates easy access to the global Content instance for internal classes
 		/// </summary>
@@ -90,6 +92,8 @@ namespace Nez
 		int _frameCounter = 0;
 		string _windowTitle;
 #endif
+
+		static Physics _physics;
 
 		Scene _scene;
 		Scene _nextScene;
@@ -138,6 +142,7 @@ namespace Nez
 #endif
 
 			_instance = this;
+			_physics = new Physics();
 			Emitter = new Emitter<CoreEvents>(new CoreEventsComparer());
 
 			var graphicsManager = new GraphicsDeviceManager(this)

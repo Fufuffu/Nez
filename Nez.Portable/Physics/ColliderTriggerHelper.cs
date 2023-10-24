@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace Nez
 {
@@ -40,11 +40,11 @@ namespace Nez
 			for (var i = 0; i < colliders.Count; i++)
 			{
 				var collider = colliders[i];
-				if(!collider.Enabled)
+				if (!collider.Enabled)
 					continue;
 
 				// fetch anything that we might collide with us at our new position
-				var neighbors = Physics.BoxcastBroadphase(collider.Bounds, collider.CollidesWithLayers);
+				var neighbors = Core.Physics.BoxcastBroadphase(collider.Bounds, collider.CollidesWithLayers).Cast<Collider>();
 				foreach (var neighbor in neighbors)
 				{
 					// we need at least one of the colliders to be a trigger
@@ -57,7 +57,7 @@ namespace Nez
 
 						// if we already have this pair in one of our sets (the previous or current trigger intersections) dont call the enter event
 						var shouldReportTriggerEvent = !_activeTriggerIntersections.Contains(pair) &&
-						                               !_previousTriggerIntersections.Contains(pair);
+													   !_previousTriggerIntersections.Contains(pair);
 						if (shouldReportTriggerEvent)
 							NotifyTriggerListeners(pair, true);
 

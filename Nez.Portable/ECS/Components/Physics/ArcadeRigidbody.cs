@@ -1,5 +1,5 @@
 using Microsoft.Xna.Framework;
-
+using System.Linq;
 
 namespace Nez
 {
@@ -169,14 +169,14 @@ namespace Nez
 			}
 
 			if (ShouldUseGravity)
-				Velocity += Physics.Gravity * Time.DeltaTime;
+				Velocity += Core.Physics.Gravity * Time.DeltaTime;
 
 			Entity.Transform.Position += Velocity * Time.DeltaTime;
 
 			CollisionResult collisionResult;
 
 			// fetch anything that we might collide with at our new position
-			var neighbors = Physics.BoxcastBroadphaseExcludingSelf(_collider, _collider.CollidesWithLayers);
+			var neighbors = Core.Physics.BoxcastBroadphaseExcludingSelf(_collider, _collider.CollidesWithLayers).Cast<Collider>();
 			foreach (var neighbor in neighbors)
 			{
 				// if the neighbor collider is of the same entity, ignore it
@@ -259,7 +259,7 @@ namespace Nez
 		/// <param name="relativeVelocity">Relative velocity.</param>
 		/// <param name="minimumTranslationVector">Minimum translation vector.</param>
 		void CalculateResponseVelocity(ref Vector2 relativeVelocity, ref Vector2 minimumTranslationVector,
-		                               out Vector2 responseVelocity)
+									   out Vector2 responseVelocity)
 		{
 			// first, we get the normalized MTV in the opposite direction: the surface normal
 			var inverseMTV = minimumTranslationVector * -1f;
@@ -285,7 +285,7 @@ namespace Nez
 
 			// elasticity affects the normal component of the velocity and friction affects the tangential component
 			responseVelocity = -(1.0f + _elasticity) * normalVelocityComponent -
-			                   coefficientOfFriction * tangentialVelocityComponent;
+							   coefficientOfFriction * tangentialVelocityComponent;
 		}
 	}
 }

@@ -79,7 +79,7 @@ namespace Nez
 				box.UpdateBox(width, height);
 				_isPositionDirty = true;
 				if (Entity != null && _isParentEntityAddedToScene && Enabled)
-					Physics.UpdateCollider(this);
+					Core.Physics.UpdateCollider(this);
 			}
 
 			return this;
@@ -100,7 +100,7 @@ namespace Nez
 				box.UpdateBox(width, box.Height);
 				_isPositionDirty = true;
 				if (Entity != null && _isParentEntityAddedToScene && Enabled)
-					Physics.UpdateCollider(this);
+					Core.Physics.UpdateCollider(this);
 			}
 
 			return this;
@@ -121,7 +121,7 @@ namespace Nez
 				box.UpdateBox(box.Width, height);
 				_isPositionDirty = true;
 				if (Entity != null && _isParentEntityAddedToScene && Enabled)
-					Physics.UpdateCollider(this);
+					Core.Physics.UpdateCollider(this);
 			}
 
 			return this;

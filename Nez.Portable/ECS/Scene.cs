@@ -341,7 +341,7 @@ namespace Nez
 				Debug.Warn("Scene has begun with no renderer. A DefaultRenderer was added automatically so that something is visible.");
 			}
 
-			Physics.Reset();
+			Core.Physics.Reset();
 
 			// prep our render textures
 			UpdateResolutionScaler();
@@ -375,7 +375,7 @@ namespace Nez
 			Camera = null;
 			Content.Dispose();
 			_sceneRenderTarget.Dispose();
-			Physics.Clear();
+			Core.Physics.Clear();
 
 			if (_destinationRenderTarget != null)
 				_destinationRenderTarget.Dispose();

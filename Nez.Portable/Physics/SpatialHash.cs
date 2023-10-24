@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
+using Nez.ECS.Components.Physics.Colliders;
 using Nez.PhysicsShapes;
 
 
@@ -42,7 +43,7 @@ namespace Nez.Spatial
 		/// <summary>
 		/// shared HashSet used to return collision info
 		/// </summary>
-		HashSet<Collider> _tempHashset = new HashSet<Collider>();
+		HashSet<ICollider> _tempHashset = new HashSet<ICollider>();
 
 
 		public SpatialHash(int cellSize = 100)
@@ -87,14 +88,14 @@ namespace Nez.Spatial
 		/// <param name="y">The y coordinate.</param>
 		/// <param name="createCellIfEmpty">If set to <c>true</c> create cell if empty.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		List<Collider> CellAtPosition(int x, int y, bool createCellIfEmpty = false)
+		List<ICollider> CellAtPosition(int x, int y, bool createCellIfEmpty = false)
 		{
-			List<Collider> cell = null;
+			List<ICollider> cell = null;
 			if (!_cellDict.TryGetValue(x, y, out cell))
 			{
 				if (createCellIfEmpty)
 				{
-					cell = new List<Collider>();
+					cell = new List<ICollider>();
 					_cellDict.Add(x, y, cell);
 				}
 			}
@@ -107,10 +108,10 @@ namespace Nez.Spatial
 		/// adds the object to the SpatialHash
 		/// </summary>
 		/// <param name="collider">Object.</param>
-		public void Register(Collider collider)
+		public void Register(ICollider collider)
 		{
 			var bounds = collider.Bounds;
-			collider.registeredPhysicsBounds = bounds;
+			collider.RegisteredPhysicsBounds = bounds;
 			var p1 = CellCoords(bounds.X, bounds.Y);
 			var p2 = CellCoords(bounds.Right, bounds.Bottom);
 
@@ -137,9 +138,9 @@ namespace Nez.Spatial
 		/// removes the object from the SpatialHash
 		/// </summary>
 		/// <param name="collider">Collider.</param>
-		public void Remove(Collider collider)
+		public void Remove(ICollider collider)
 		{
-			var bounds = collider.registeredPhysicsBounds;
+			var bounds = collider.RegisteredPhysicsBounds;
 			var p1 = CellCoords(bounds.X, bounds.Y);
 			var p2 = CellCoords(bounds.Right, bounds.Bottom);
 
@@ -161,7 +162,7 @@ namespace Nez.Spatial
 		/// removes the object from the SpatialHash using a brute force approach
 		/// </summary>
 		/// <param name="obj">Object.</param>
-		public void RemoveWithBruteForce(Collider obj)
+		public void RemoveWithBruteForce(ICollider obj)
 		{
 			_cellDict.Remove(obj);
 		}
@@ -211,7 +212,7 @@ namespace Nez.Spatial
 		/// returns all the Colliders in the SpatialHash
 		/// </summary>
 		/// <returns>The all objects.</returns>
-		public HashSet<Collider> GetAllObjects()
+		public HashSet<ICollider> GetAllObjects()
 		{
 			return _cellDict.GetAllObjects();
 		}
@@ -225,7 +226,7 @@ namespace Nez.Spatial
 		/// <returns>The neighbors.</returns>
 		/// <param name="bounds">Bounds.</param>
 		/// <param name="layerMask">Layer mask.</param>
-		public HashSet<Collider> AabbBroadphase(ref RectangleF bounds, Collider excludeCollider, int layerMask)
+		public HashSet<ICollider> AabbBroadphase(ref RectangleF bounds, ICollider excludeCollider, int layerMask)
 		{
 			_tempHashset.Clear();
 
@@ -354,7 +355,7 @@ namespace Nez.Spatial
 		/// <param name="rect">Rect.</param>
 		/// <param name="results">Results.</param>
 		/// <param name="layerMask">Layer mask.</param>
-		public int OverlapRectangle(ref RectangleF rect, Collider[] results, int layerMask)
+		public int OverlapRectangle(ref RectangleF rect, ICollider[] results, int layerMask)
 		{
 			_overlapTestBox.UpdateBox(rect.Width, rect.Height);
 			_overlapTestBox.position = rect.Location;
@@ -407,7 +408,7 @@ namespace Nez.Spatial
 		/// <param name="radius">Radius.</param>
 		/// <param name="results">Results.</param>
 		/// <param name="layerMask">Layer mask.</param>
-		public int OverlapCircle(Vector2 circleCenter, float radius, Collider[] results, int layerMask)
+		public int OverlapCircle(Vector2 circleCenter, float radius, ICollider[] results, int layerMask)
 		{
 			var bounds = new RectangleF(circleCenter.X - radius, circleCenter.Y - radius, radius * 2f, radius * 2f);
 
@@ -465,7 +466,7 @@ namespace Nez.Spatial
 	/// </summary>
 	class IntIntDictionary
 	{
-		Dictionary<long, List<Collider>> _store = new Dictionary<long, List<Collider>>();
+		Dictionary<long, List<ICollider>> _store = new Dictionary<long, List<ICollider>>();
 
 
 		/// <summary>
@@ -482,7 +483,7 @@ namespace Nez.Spatial
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Add(int x, int y, List<Collider> list)
+		public void Add(int x, int y, List<ICollider> list)
 		{
 			_store.Add(GetKey(x, y), list);
 		}
@@ -493,7 +494,7 @@ namespace Nez.Spatial
 		/// </summary>
 		/// <param name="obj">Object.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Remove(Collider obj)
+		public void Remove(ICollider obj)
 		{
 			foreach (var list in _store.Values)
 			{
@@ -504,7 +505,7 @@ namespace Nez.Spatial
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryGetValue(int x, int y, out List<Collider> list)
+		public bool TryGetValue(int x, int y, out List<ICollider> list)
 		{
 			return _store.TryGetValue(GetKey(x, y), out list);
 		}
@@ -515,9 +516,9 @@ namespace Nez.Spatial
 		/// </summary>
 		/// <returns>The all objects.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public HashSet<Collider> GetAllObjects()
+		public HashSet<ICollider> GetAllObjects()
 		{
-			var set = new HashSet<Collider>();
+			var set = new HashSet<ICollider>();
 
 			foreach (var list in _store.Values)
 				set.UnionWith(list);
@@ -546,7 +547,7 @@ namespace Nez.Spatial
 		//Rectangle _hitTesterRect; see note in checkRayIntersection
 		RaycastHit[] _hits;
 		RaycastHit _tempHit;
-		List<Collider> _checkedColliders = new List<Collider>();
+		List<ICollider> _checkedColliders = new List<ICollider>();
 		List<RaycastHit> _cellHits = new List<RaycastHit>();
 		Ray2D _ray;
 		int _layerMask;
@@ -572,7 +573,7 @@ namespace Nez.Spatial
 		/// <param name="hits">Hits.</param>
 		/// <param name="hitCounter">Hit counter.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool CheckRayIntersection(int cellX, int cellY, List<Collider> cell)
+		public bool CheckRayIntersection(int cellX, int cellY, List<ICollider> cell)
 		{
 			float fraction;
 			for (var i = 0; i < cell.Count; i++)
@@ -586,7 +587,7 @@ namespace Nez.Spatial
 				_checkedColliders.Add(potential);
 
 				// only hit triggers if we are set to do so
-				if (potential.IsTrigger && !Physics.RaycastsHitTriggers)
+				if (potential.IsTrigger && !Core.Physics.RaycastsHitTriggers)
 					continue;
 
 				// make sure the Collider is on the layerMask
@@ -602,7 +603,7 @@ namespace Nez.Spatial
 					if (potential.Shape.CollidesWithLine(_ray.Start, _ray.End, out _tempHit))
 					{
 						// check to see if the raycast started inside the collider if we should excluded those rays
-						if (!Physics.RaycastsStartInColliders && potential.Shape.ContainsPoint(_ray.Start))
+						if (!Core.Physics.RaycastsStartInColliders && potential.Shape.ContainsPoint(_ray.Start))
 							continue;
 
 						// TODO: make sure the collision point is in the current cell and if it isnt store it off for later evaluation

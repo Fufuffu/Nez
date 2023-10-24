@@ -1,16 +1,23 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
+using Nez.ECS.Components.Physics.Colliders;
 using Nez.PhysicsShapes;
 
 
 namespace Nez
 {
-	public abstract class Collider : Component
+	public abstract class Collider : Component, ICollider
 	{
 		/// <summary>
 		/// the underlying Shape of the Collider
 		/// </summary>
-		public Shape Shape;
+		public Shape Shape { get; set; }
+
+		/// <summary>
+		/// Physics instance in which this collider is registered
+		/// </summary>
+		public Physics RegisteredPhysics => Core.Physics;
 
 		/// <summary>
 		/// localOffset is added to entity.position to get the final position for the collider geometry. This allows you to add multiple
@@ -22,11 +29,18 @@ namespace Nez
 			set => SetLocalOffset(value);
 		}
 
+		public float LocalOffsetLength => _localOffsetLength;
+
 		/// <summary>
 		/// represents the absolute position to this Collider. It is entity.transform.position + localPosition - origin.
 		/// </summary>
 		/// <value>The absolute position.</value>
 		public Vector2 AbsolutePosition => Entity.Transform.Position + _localOffset;
+
+		/// <summary>
+		/// Wraps Transform.Position
+		/// </summary>
+		public Vector2 Position => Entity.Transform.Position;
 
 		/// <summary>
 		/// wraps Transform.rotation and returns 0 if this Collider does not rotate with the Entity else it returns Transform.rotation
@@ -44,24 +58,31 @@ namespace Nez
 		}
 
 		/// <summary>
+		/// Wraps Transform.Scale
+		/// </summary>
+		public Vector2 Scale => Entity.Transform.Scale;
+
+		/// <summary>
 		/// if this collider is a trigger it will not cause collisions but it will still trigger events
 		/// </summary>
-		public bool IsTrigger;
+		public bool IsTrigger { get; set; }
 
 		/// <summary>
 		/// physicsLayer can be used as a filter when dealing with collisions. The Flags class has methods to assist with bitmasks.
 		/// </summary>
-		public int PhysicsLayer = 1 << 0;
+		public int PhysicsLayer { get; set; } = 1 << 0;
 
 		/// <summary>
 		/// layer mask of all the layers this Collider should collide with when Entity.move methods are used. defaults to all layers.
 		/// </summary>
-		public int CollidesWithLayers = Physics.AllLayers;
+		public int CollidesWithLayers { get; set; } = Physics.AllLayers;
 
 		/// <summary>
 		/// if true, the Collider will scale and rotate following the Transform it is attached to
 		/// </summary>
 		public bool ShouldColliderScaleAndRotateWithTransform = true;
+
+		public bool ShouldRotateAndScale => ShouldColliderScaleAndRotateWithTransform;
 
 		public virtual RectangleF Bounds
 		{
@@ -76,6 +97,17 @@ namespace Nez
 				return Shape.bounds;
 			}
 		}
+
+		public RectangleF RegisteredPhysicsBounds
+		{
+			get => registeredPhysicsBounds;
+			set => registeredPhysicsBounds = value;
+		}
+
+		/// <summary>
+		/// Wrapper for is rotation dirty
+		/// </summary>
+		public bool IsRotationDirty => _isRotationDirty;
 
 		/// <summary>
 		/// the bounds of this Collider when it was registered with the Physics system. Storing this allows us to always be able to
@@ -114,12 +146,12 @@ namespace Nez
 		{
 			if (_localOffset != offset)
 			{
-				if(Enabled)
+				if (Enabled)
 					UnregisterColliderWithPhysicsSystem();
 				_localOffset = offset;
 				_localOffsetLength = _localOffset.Length();
 				_isPositionDirty = true;
-				if(Enabled)
+				if (Enabled)
 					RegisterColliderWithPhysicsSystem();
 			}
 
@@ -185,7 +217,7 @@ namespace Nez
 			}
 
 			_isParentEntityAddedToScene = true;
-			if(Enabled)
+			if (Enabled)
 				RegisterColliderWithPhysicsSystem();
 		}
 
@@ -214,7 +246,7 @@ namespace Nez
 			}
 
 			if (_isColliderRegistered)
-				Physics.UpdateCollider(this);
+				Core.Physics.UpdateCollider(this);
 		}
 
 
@@ -241,7 +273,7 @@ namespace Nez
 			// entity could be null if properties such as origin are changed before we are added to an Entity
 			if (_isParentEntityAddedToScene && !_isColliderRegistered && Enabled)
 			{
-				Physics.AddCollider(this);
+				Core.Physics.AddCollider(this);
 				_isColliderRegistered = true;
 			}
 		}
@@ -253,7 +285,7 @@ namespace Nez
 		public virtual void UnregisterColliderWithPhysicsSystem()
 		{
 			if (_isParentEntityAddedToScene && _isColliderRegistered)
-				Physics.RemoveCollider(this);
+				Core.Physics.RemoveCollider(this);
 			_isColliderRegistered = false;
 		}
 
@@ -277,7 +309,7 @@ namespace Nez
 		/// <returns><c>true</c>, if with was collidesed, <c>false</c> otherwise.</returns>
 		/// <param name="collider">Collider.</param>
 		/// <param name="result">Result.</param>
-		public bool CollidesWith(Collider collider, out CollisionResult result)
+		public bool CollidesWith(ICollider collider, out CollisionResult result)
 		{
 			if (Shape.CollidesWithShape(collider.Shape, out result))
 			{
@@ -297,7 +329,7 @@ namespace Nez
 		/// <param name="collider">Collider.</param>
 		/// <param name="motion">Motion.</param>
 		/// <param name="result">Result.</param>
-		public bool CollidesWith(Collider collider, Vector2 motion, out CollisionResult result)
+		public bool CollidesWith(ICollider collider, Vector2 motion, out CollisionResult result)
 		{
 			// alter the shapes position so that it is in the place it would be after movement so we can check for overlaps
 			var oldPosition = Shape.position;
@@ -325,7 +357,7 @@ namespace Nez
 			result = new CollisionResult();
 
 			// fetch anything that we might collide with at our new position
-			var neighbors = Physics.BoxcastBroadphaseExcludingSelf(this, CollidesWithLayers);
+			var neighbors = Core.Physics.BoxcastBroadphaseExcludingSelf(this, CollidesWithLayers).Cast<Collider>();
 
 			foreach (var neighbor in neighbors)
 			{
@@ -357,7 +389,7 @@ namespace Nez
 			var colliderBounds = Bounds;
 			colliderBounds.X += motion.X;
 			colliderBounds.Y += motion.Y;
-			var neighbors = Physics.BoxcastBroadphaseExcludingSelf(this, ref colliderBounds, CollidesWithLayers);
+			var neighbors = Core.Physics.BoxcastBroadphaseExcludingSelf(this, ref colliderBounds, CollidesWithLayers).Cast<Collider>();
 
 			// alter the shapes position so that it is in the place it would be after movement so we can check for overlaps
 			var oldPosition = Shape.position;

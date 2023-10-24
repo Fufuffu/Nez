@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Nez.PhysicsShapes;
-
+using System.Linq;
 
 namespace Nez.Shadows
 {
@@ -150,7 +150,7 @@ namespace Nez.Shadows
 			var totalCollisions = 0;
 			_polygon.position = Entity.Transform.Position + _localOffset;
 
-			var neighbors = Physics.BoxcastBroadphase(Bounds, CollidesWithLayers);
+			var neighbors = Core.Physics.BoxcastBroadphase(Bounds, CollidesWithLayers).Cast<Collider>();
 			foreach (var neighbor in neighbors)
 			{
 				// skip triggers

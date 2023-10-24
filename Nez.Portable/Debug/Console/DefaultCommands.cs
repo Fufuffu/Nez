@@ -228,7 +228,7 @@ namespace Nez.Console
 			var ticker = 0f;
 			Core.Schedule(0f, true, null, timer =>
 			{
-				Nez.Physics.DebugDraw(0f);
+				Core.Physics.DebugDraw(0f);
 				ticker += Time.DeltaTime;
 				if (ticker >= secondsToDisplay)
 				{
@@ -238,7 +238,7 @@ namespace Nez.Console
 			});
 
 			Instance.Log("Physics system collider count: " +
-			                          ((HashSet<Collider>) Nez.Physics.GetAllColliders()).Count);
+			                          ((HashSet<Collider>) Core.Physics.GetAllColliders()).Count);
 		}
 
 

@@ -174,7 +174,7 @@ namespace Nez.Verlet
 			Vector2 midPoint;
 			PreparePolygonForCollisionChecks(out midPoint);
 
-			var colliders = Physics.BoxcastBroadphase(ref _polygon.bounds, collidesWithLayers);
+			var colliders = Core.Physics.BoxcastBroadphase(ref _polygon.bounds, collidesWithLayers);
 			foreach (var collider in colliders)
 			{
 				CollisionResult result;
@@ -206,7 +206,7 @@ namespace Nez.Verlet
 			{
 				pt = Vector2.Lerp(_particleOne.Position, _particleTwo.Position,
 					(j + 1) / (float) TotalPointsToApproximateCollisionsWith);
-				var collidedCount = Physics.OverlapCircleAll(pt, 3, VerletWorld._colliders, collidesWithLayers);
+				var collidedCount = Core.Physics.OverlapCircleAll(pt, 3, VerletWorld._colliders, collidesWithLayers);
 				for (var i = 0; i < collidedCount; i++)
 				{
 					var collider = VerletWorld._colliders[i];

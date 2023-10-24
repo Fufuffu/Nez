@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-
+using System.Linq;
 
 namespace Nez
 {
@@ -37,7 +37,7 @@ namespace Nez
 			Entity.Transform.Position += motion;
 
 			// fetch anything that we might collide with us at our new position
-			var neighbors = Physics.BoxcastBroadphase(_collider.Bounds, _collider.CollidesWithLayers);
+			var neighbors = Core.Physics.BoxcastBroadphase(_collider.Bounds, _collider.CollidesWithLayers).Cast<Collider>();
 			foreach (var neighbor in neighbors)
 			{
 				if (_collider.Overlaps(neighbor) && neighbor.Enabled)

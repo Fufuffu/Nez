@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-
+using Nez.ECS.Components.Physics.Colliders;
 
 namespace Nez.PhysicsShapes
 {
@@ -22,18 +22,7 @@ namespace Nez.PhysicsShapes
 		/// </summary>
 		public RectangleF bounds;
 
-		public void RecalculateBounds(Collider collider)
-		{
-			RecalculateBounds(collider.LocalOffset,
-							  collider._localOffsetLength,
-							  collider.Entity.Transform.Position,
-							  collider.Entity.Transform.Scale,
-							  collider.Entity.Transform.Rotation,
-							  collider.ShouldColliderScaleAndRotateWithTransform,
-							  collider._isRotationDirty);
-		}
-
-		public abstract void RecalculateBounds(Vector2 localOffset, float localOffsetLength, Vector2 entityPosition, Vector2 entityScale, float entityRotation, bool shouldRotateAndScale, bool isRotationDirty);
+		public abstract void RecalculateBounds(ICollider collider);
 
 		public abstract bool Overlaps(Shape other);
 

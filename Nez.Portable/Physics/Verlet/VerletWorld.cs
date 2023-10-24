@@ -142,7 +142,7 @@ namespace Nez.Verlet
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		void HandleCollisions(Particle p, int collidesWithLayers)
 		{
-			var collidedCount = Physics.OverlapCircleAll(p.Position, p.Radius, _colliders, collidesWithLayers);
+			var collidedCount = Core.Physics.OverlapCircleAll(p.Position, p.Radius, _colliders, collidesWithLayers);
 			for (var i = 0; i < collidedCount; i++)
 			{
 				var collider = _colliders[i];
