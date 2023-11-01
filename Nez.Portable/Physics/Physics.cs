@@ -44,6 +44,10 @@ namespace Nez
 		/// </summary>
 		Collider[] _colliderArray = new Collider[1];
 
+		public Physics()
+		{
+			Reset();
+		}
 
 		public void Reset()
 		{
