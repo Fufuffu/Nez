@@ -1,19 +1,18 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-
+using Nez.ECS.Components.Physics.Colliders;
 
 namespace Nez.PhysicsShapes
 {
 	public class Circle : Shape
 	{
 		public float Radius;
-		internal float _originalRadius;
-
+		public float originalRadius;
 
 		public Circle(float radius)
 		{
 			Radius = radius;
-			_originalRadius = radius;
+			originalRadius = radius;
 		}
 
 
@@ -26,39 +25,39 @@ namespace Nez.PhysicsShapes
 		/// <param name="position">Position.</param>
 		internal void RecalculateBounds(float radius, Vector2 position)
 		{
-			_originalRadius = radius;
+			originalRadius = radius;
 			Radius = radius;
 			this.position = position;
 			bounds = new RectangleF(position.X - radius, position.Y - radius, radius * 2f, radius * 2f);
 		}
 
 
-		internal override void RecalculateBounds(Collider collider)
+		public override void RecalculateBounds(ICollider collider)
 		{
 			// if we dont have rotation or dont care about TRS we use localOffset as the center so we'll start with that
 			center = collider.LocalOffset;
 
-			if (collider.ShouldColliderScaleAndRotateWithTransform)
+			if (collider.ShouldRotateAndScale)
 			{
 				// we only scale lineraly being a circle so we'll use the max value
-				var scale = collider.Entity.Transform.Scale;
+				var scale = collider.Scale;
 				var hasUnitScale = scale.X == 1 && scale.Y == 1;
 				var maxScale = Math.Max(scale.X, scale.Y);
-				Radius = _originalRadius * maxScale;
+				Radius = originalRadius * maxScale;
 
-				if (collider.Entity.Transform.Rotation != 0)
+				if (collider.Rotation != 0)
 				{
 					// to deal with rotation with an offset origin we just move our center in a circle around 0,0 with our offset making the 0 angle
 					var offsetAngle = Mathf.Atan2(collider.LocalOffset.Y, collider.LocalOffset.X) * Mathf.Rad2Deg;
 					var offsetLength = hasUnitScale
-						? collider._localOffsetLength
-						: (collider.LocalOffset * collider.Entity.Transform.Scale).Length();
+						? collider.LocalOffsetLength
+						: (collider.LocalOffset * collider.Scale).Length();
 					center = Mathf.PointOnCircle(Vector2.Zero, offsetLength,
-						collider.Entity.Transform.RotationDegrees + offsetAngle);
+						MathHelper.ToDegrees(collider.Rotation) + offsetAngle);
 				}
 			}
 
-			position = collider.Entity.Transform.Position + center;
+			position = collider.Position + center;
 			bounds = new RectangleF(position.X - Radius, position.Y - Radius, Radius * 2f, Radius * 2f);
 		}
 

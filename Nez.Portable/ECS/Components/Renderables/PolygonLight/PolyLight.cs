@@ -108,7 +108,7 @@ namespace Nez.Shadows
 		/// <returns>The overlapped components.</returns>
 		protected virtual int GetOverlappedColliders()
 		{
-			return Physics.OverlapCircleAll(Entity.Position + _localOffset, _radius, _colliderCache, CollidesWithLayers);
+			return Core.Physics.OverlapCircleAll(Entity.Position + _localOffset, _radius, _colliderCache, CollidesWithLayers);
 		}
 
 		/// <summary>

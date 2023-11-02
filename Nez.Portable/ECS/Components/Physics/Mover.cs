@@ -48,7 +48,7 @@ namespace Nez
                 bounds.X += motion.X;
                 bounds.Y += motion.Y;
                 var neighbors =
-                    Physics.BoxcastBroadphaseExcludingSelf(collider, ref bounds, collider.CollidesWithLayers);
+                    Core.Physics.BoxcastBroadphaseExcludingSelf(collider, ref bounds, collider.CollidesWithLayers);
 
                 foreach (var neighbor in neighbors)
                 {
@@ -103,7 +103,7 @@ namespace Nez
                 bounds.X += motion.X;
                 bounds.Y += motion.Y;
                 var neighbors =
-                    Physics.BoxcastBroadphaseExcludingSelf(collider, ref bounds, collider.CollidesWithLayers);
+                    Core.Physics.BoxcastBroadphaseExcludingSelf(collider, ref bounds, collider.CollidesWithLayers);
 
                 foreach (var neighbor in neighbors)
                 {

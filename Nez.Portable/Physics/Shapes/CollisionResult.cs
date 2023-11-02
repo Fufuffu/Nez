@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-
+using Nez.ECS.Components.Physics.Colliders;
 
 namespace Nez
 {
@@ -9,7 +9,7 @@ namespace Nez
 		/// <summary>
 		/// the collider that was collided with
 		/// </summary>
-		public Collider Collider;
+		public ICollider Collider;
 
 		/// <summary>
 		/// The normal vector of the surface hit by the shape

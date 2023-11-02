@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-
+using Nez.ECS.Components.Physics.Colliders;
 
 namespace Nez
 {
@@ -8,7 +8,7 @@ namespace Nez
 		/// <summary>
 		/// The collider hit by the ray
 		/// </summary>
-		public Collider Collider;
+		public ICollider Collider;
 
 		/// <summary>
 		/// Fraction of the distance along the ray that the hit occurred.
@@ -36,7 +36,7 @@ namespace Nez
 		public Vector2 Centroid;
 
 
-		public RaycastHit(Collider collider, float fraction, float distance, Vector2 point, Vector2 normal)
+		public RaycastHit(ICollider collider, float fraction, float distance, Vector2 point, Vector2 normal)
 		{
 			Collider = collider;
 			Fraction = fraction;
@@ -47,7 +47,7 @@ namespace Nez
 		}
 
 
-		internal void SetValues(Collider collider, float fraction, float distance, Vector2 point)
+		internal void SetValues(ICollider collider, float fraction, float distance, Vector2 point)
 		{
 			Collider = collider;
 			Fraction = fraction;

@@ -93,7 +93,7 @@ namespace Nez
 		void RenderLight(IRenderable renderable, Camera cam)
 		{
 			// fetch all the Colliders in range
-			var colliders = Physics.BoxcastBroadphase(renderable.Bounds, CollidesWithLayers);
+			var colliders = Core.Physics.BoxcastBroadphase(renderable.Bounds, CollidesWithLayers);
 			var colliderCount = IEnumerableExtensions.IEnumerableExt.Count(colliders);
 
 			if (colliderCount > 0)
